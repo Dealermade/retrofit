@@ -17,6 +17,8 @@ package retrofit;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+
+import retrofit.client.Request;
 import retrofit.client.Response;
 import retrofit.converter.ConversionException;
 import retrofit.converter.Converter;
@@ -24,24 +26,24 @@ import retrofit.mime.TypedInput;
 
 public class RetrofitError extends RuntimeException {
   public static RetrofitError networkError(String url, IOException exception) {
-    return new RetrofitError(exception.getMessage(), url, null, null, null, Kind.NETWORK,
+    return new RetrofitError(exception.getMessage(), url, null, null, null, null, Kind.NETWORK,
         exception);
   }
 
-  public static RetrofitError conversionError(String url, Response response, Converter converter,
+  public static RetrofitError conversionError(String url, Response response, Request request, Converter converter,
       Type successType, ConversionException exception) {
-    return new RetrofitError(exception.getMessage(), url, response, converter, successType,
+    return new RetrofitError(exception.getMessage(), url, response, request, converter, successType,
         Kind.CONVERSION, exception);
   }
 
-  public static RetrofitError httpError(String url, Response response, Converter converter,
+  public static RetrofitError httpError(String url, Response response, Request request, Converter converter,
       Type successType) {
     String message = response.getStatus() + " " + response.getReason();
-    return new RetrofitError(message, url, response, converter, successType, Kind.HTTP, null);
+    return new RetrofitError(message, url, response, request, converter, successType, Kind.HTTP, null);
   }
 
   public static RetrofitError unexpectedError(String url, Throwable exception) {
-    return new RetrofitError(exception.getMessage(), url, null, null, null, Kind.UNEXPECTED,
+    return new RetrofitError(exception.getMessage(), url, null, null, null, null, Kind.UNEXPECTED,
         exception);
   }
 
@@ -62,11 +64,12 @@ public class RetrofitError extends RuntimeException {
 
   private final String url;
   private final Response response;
+  private final Request request;
   private final Converter converter;
   private final Type successType;
   private final Kind kind;
 
-  RetrofitError(String message, String url, Response response, Converter converter,
+  RetrofitError(String message, String url, Response response, Request request, Converter converter,
       Type successType, Kind kind, Throwable exception) {
     super(message, exception);
     this.url = url;
@@ -74,6 +77,7 @@ public class RetrofitError extends RuntimeException {
     this.converter = converter;
     this.successType = successType;
     this.kind = kind;
+    this.request = request;
   }
 
   /** The request URL which produced the error. */
@@ -85,6 +89,11 @@ public class RetrofitError extends RuntimeException {
   public Response getResponse() {
     return response;
   }
+
+  /** Response object containing status code, headers, body, etc. */
+  public Request getRequest() {
+    return request;
+}
 
   /** The event kind which triggered this error. */
   public Kind getKind() {

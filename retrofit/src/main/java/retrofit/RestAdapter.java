@@ -366,12 +366,12 @@ public class RestAdapter {
             // The response body was partially read by the converter. Replace it with null.
             response = Utils.replaceResponseBody(response, null);
 
-            throw RetrofitError.conversionError(url, response, converter, type, e);
+            throw RetrofitError.conversionError(url, response, request, converter, type, e);
           }
         }
 
         response = Utils.readBodyToBytesIfNecessary(response);
-        throw RetrofitError.httpError(url, response, converter, type);
+        throw RetrofitError.httpError(url, response, request, converter, type);
       } catch (RetrofitError e) {
         throw e; // Pass through our own errors.
       } catch (IOException e) {
